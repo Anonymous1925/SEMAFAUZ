@@ -14,6 +14,26 @@ The repository evaluates *SEMAFAUZ* using [LexGLUE](https://github.com/coastalcp
 
 Details of the performance of our fine-tuned models versus the original from [LexGLUE](https://github.com/coastalcph/lex-glue).
 
+
+## User Study
+
+All materials related to the user study can be found in the [User Study/](User%20Study/) folder.
+
+- The questionnaire presented to participants is available here:  
+  [User Study on the Validity of Automatically Generated Legal Texts - General Questions.pdf](User%20Study/User%20Study%20on%20the%20Validity%20of%20Automatically%20Generated%20Legal%20Texts%20-%20General%20Questions.pdf)  
+  This includes all grammar, semantic, and legal validity assessment questions, as well as validation and background checks.
+
+- Quantitative responses and their aggregated results are available in:  
+  [Public_user_study_results.xlsx](User%20Study/Public_user_study_results.xlsx)
+
+- Aggregated summaries of qualitative (open-ended) responses can be found in:  
+  [Public_result_qualitative_survey.xlsx](User%20Study/Public_result_qualitative_survey.xlsx)
+
+> ⚠️ **Note:**  
+> The full coding for individual qualitative responses is not included in this repository. This coding spans multiple files, and carefully anonymizing each would be error-prone. Any risk of deanonymization would violate the confidentiality requirements of our user study and compromise the double-blind review process.  
+> To preserve participant anonymity and ensure compliance with ethical and publication guidelines, the coding artifacts will be released **after** the paper is accepted for publication.
+
+
 ## Getting Started
 
 Reproducing the testing takes weeks, and even the processing of the results requires time as it involves opening and processing a multitude of files.
