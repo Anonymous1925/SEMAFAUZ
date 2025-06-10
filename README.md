@@ -17,17 +17,18 @@ Details of the performance of our fine-tuned models versus the original from [Le
 
 ## User Study
 
+We conducted a user study with 95 domain experts (lawyers and computer scientists) to evaluate the semantic validity of SEMAFAUZ-generated test inputs. The study included around 220 questions across grammar, semantics, and legal reasoning. Participants were asked to assess texts blindly and with source disclosure, rate similarity and correctness, and identify potential biases.
 All materials related to the user study can be found in the [User Study/](User%20Study/) folder.
 
 - The questionnaire presented to participants is available here:  
-  [User Study on the Validity of Automatically Generated Legal Texts - General Questions.pdf](User%20Study/User%20Study%20on%20the%20Validity%20of%20Automatically%20Generated%20Legal%20Texts%20-%20General%20Questions.pdf)  
+  [User Study on the Validity of Automatically Generated Legal Texts - General Questions](User%20Study/User%20Study%20on%20the%20Validity%20of%20Automatically%20Generated%20Legal%20Texts%20-%20General%20Questions.pdf)  
   This includes all grammar, semantic, and legal validity assessment questions, as well as validation and background checks.
 
 - Quantitative responses and their aggregated results are available in:  
-  [Public_user_study_results.xlsx](User%20Study/Public_user_study_results.xlsx)
+  [Public_user_study_results](User%20Study/Public_user_study_results.xlsx)
 
 - Aggregated summaries of qualitative (open-ended) responses can be found in:  
-  [Public_result_qualitative_survey.xlsx](User%20Study/Public_result_qualitative_survey.xlsx)
+  [Public_result_qualitative_survey](User%20Study/Public_result_qualitative_survey.xlsx)
 
 > ⚠️ **Note:**  
 > The full coding for individual qualitative responses is not included in this repository. This coding spans multiple files, and carefully anonymizing each would be error-prone. Any risk of deanonymization would violate the confidentiality requirements of our user study and compromise the double-blind review process.  
