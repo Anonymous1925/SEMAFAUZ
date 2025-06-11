@@ -53,7 +53,8 @@ PYTHONUNBUFFERED=1 PYTHONHASHSEED=0 python your_script.py
 
 The experiments were tested on both Windows and Linux (Ubuntu 20.04).
 
-- Python 3.8.
+- Python 3.9.
+- NVIDIA GPU with at least 24GB VRAM
 - At least one non-hierarchical model trained from [LexGLUE](https://github.com/coastalcph/lex-glue) (all 16 combinations of BERT models/datasets cited above to reproduce everything).
 - Access to the Llama model `meta-llama/Llama-2-7b-chat-hf` on Hugging Face. You may need to complete a form to request access from Meta [here](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf).
 - Access to OpenAI's `gpt-3.5-turbo-0125` model. Ensure sufficient credits in your OpenAI account. You can manage credits and billing [here](https://platform.openai.com/settings/organization/billing/overview) and find specific billing details [here](https://platform.openai.com/docs/models/gpt-3-5#gpt-3-5-turbo).
@@ -69,17 +70,99 @@ It is recommended to use **separate virtual environments** for BERT models and L
 
 - Ensure all dependencies in `requirements_bert_mutation.txt` are installed. It is best to use a dedicated virtual environment for BERT-related experiments.
 
+- You will need CUDA 11 or above installed
 #### Training
 
 Train the BERT models using the datasets specified in [LexGLUE](https://github.com/coastalcph/lex-glue).
 
-#### Testing
+## Testing
 
-To test a BERT model, simply launch `src/smart_replacement.py` with the appropriate parameters. Be sure to test a model for biases using the datasets it was trained with.
+To test a BERT model, run the following script with the appropriate parameters:
 
-- `model`: Path to the model you want to test.
-- `dataset_path`: Hugging Face path to the dataset.
-- `set`: Dataset split to use: e.g., `"train"`, `"validation"`, or `"test"`.
+```
+python3 src/smart_replacement.py <model> <dataset_path> <set> [options]
+```
+
+E.g This code will run the generation of the mutants for ECTHR dataset, with bert-base-uncased's truncation size. And ignore Structural Similarity Check.
+```
+python3 src/smart_replacement.py ../models/ecthr_a/bert-base-uncased/seed_1/ lex_glue test --comment="checking_ablation" --checking_ablation --data_path="../data" --output_path="../output"
+```
+
+To reproduce the results of the paper, it is required to run this for each dataset, model and ablation setting.
+
+### Required Parameters
+
+- `<model>`: Path to the model to test.  
+  Must be one of:  `'bert-base-uncased'`, `'microsoft/deberta-base'`, `'roberta-base'`, `'nlpaueb/legal-bert-base-uncased'`
+
+- `<dataset_path>`: Hugging Face path to the dataset.  
+  Must be one of:  `"ecthr_a"`, `"scotus"`, `"ledgar"`, `"eurlex"`
+
+- `<set>`: Dataset split to use: `"train"`, `"validation"`, or `"test"`.
+
+### Optional Parameters
+
+- `--comment`: Short comment added to the results (default: `'default'`).  
+  **⚠️ When using an ablation flag, the comment must exactly match the ablation name** for future processing steps to function correctly.
+
+- `--length`: Maximum sequence length used for label truncation (default: `512`).
+
+- `--depen_ablation`: Enable dependency-based ablation.
+- `--single_ablation`: Enable single-unit ablation.
+- `--checking_ablation`: Enable checking-related ablation.
+- `--coref_ablation`: Enable only and only coreference, this flag will activate the other flags and use coreference alone.
+- `--sememe_ablation`: Enable sememe-based ablation.
+
+- `--mutation_only`: If set, only mutated inputs will be generated and no testing will be performed.
+
+- `--output_path`: Path to the output folder where the mutants and results will be generated (default: `../output/`).
+- `--data_path`: Path to the data folder containing the dictionnary (default: `../data/`).
+
+### Example
+
+```bash
+python3 src/smart_replacement.py ../models/ecthr_a/bert-base-uncased/seed_1/ lex_glue test --comment="checking_ablation" --checking_ablation --data_path="../data" --output_path="../output"
+```
+
+In this example:
+- Mutants are generated for the `lex_glue` dataset using the `test` split.
+- The model is loaded from the local path: `../models/ecthr_a/bert-base-uncased/seed_1/`.
+- The model used is `bert-base-uncased`, and the input will be truncated using its default length (512 tokens).
+- The dataset used is `ecthr_a`.
+- The `checking_ablation` technique is activated, Structural Similarity Check is **ignored** (not used).
+- The output will be saved in `../output`, and data will be read from `../data`.
+- The `--comment` is explicitly set to `"checking_ablation"` to match the ablation type — this is **required** for downstream processing.
+
+> ✅ **Important**: When using an ablation flag (e.g., `--checking_ablation`), the `--comment` must match its name exactly (e.g., `--comment="checking_ablation"`).
+
+
+### Output Files
+
+The script will generate result files inside the directory specified by the `--output_path` parameter (default is `../output/`). The folder structure is as follows:
+
+```
+<output_path>/
+└── <dataset>/
+    └── <model>/
+        └── <set>/
+            ├── base_prediction.pkl
+            ├── truncated_text.pkl
+            └── error_details/
+                └── <ablation>_mutants.pkl  (only if an ablation is used)
+```
+
+#### Parameters:
+- `<output_path>`: The root of the output folder, defined by the `--output_path` argument (default: `../output/`)
+- `<dataset>`: The name of the dataset (e.g., `ecthr_a`)
+- `<model>`: The model used (e.g., `bert-base-uncased`)
+- `<set>`: The dataset split (`train`, `validation`, or `test`)
+- `<ablation>`: The ablation method used (e.g., `checking_ablation`, `single_ablation`, etc.)
+
+#### Description of Output Files
+
+- `base_prediction.pkl`: The model’s predictions on the original, unmodified inputs.
+- `truncated_text.pkl`: The input texts after truncation based on the `--length` parameter.
+- `<ablation>_mutants.pkl`: File containing mutated inputs and predictions.
 
 ## Useful Links
 

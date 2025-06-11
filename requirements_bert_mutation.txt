@@ -1,3 +1,5 @@
+--extra-index-url https://download.pytorch.org/whl/cu113
+
 accelerate==0.25.0
 aiohttp==3.8.1
 aiosignal==1.2.0
@@ -116,10 +118,10 @@ thinc==8.0.17
 threadpoolctl==3.1.0
 tokenizers==0.13.3
 tomli==2.0.1
-torch==1.11.0
-torchaudio==0.11.0
+torch==1.11.0+cu113
+torchaudio==0.11.0+cu113
 torchmetrics==0.9.3
-torchvision==0.12.0
+torchvision==0.12.0+cu113
 tqdm==4.63.1
 traitlets==5.5.0
 transformers==4.16.0

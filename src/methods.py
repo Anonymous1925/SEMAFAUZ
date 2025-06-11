@@ -19,9 +19,10 @@ def predict(text, tokenizer, model, isMulti, max_length, device):
 
 def getPrediction(path, string_array, tokenizer, model, isMulti, max_length, device):
     size = len(string_array)
-    prediction_file = path + "base_prediction.npy"
+    prediction_file = path + "base_prediction.pkl"
     if os.path.isfile(prediction_file):
-        model_base_prediction = np.load(prediction_file, allow_pickle=True)
+        # model_base_prediction = np.load(prediction_file, allow_pickle=True)
+        model_base_prediction = getFromPickle(prediction_file, "rb")
     else:
         print("Creating base predictions ...")
         model_base_prediction = [[]] * size
@@ -29,7 +30,8 @@ def getPrediction(path, string_array, tokenizer, model, isMulti, max_length, dev
             predicted_class_id = predict(string_array[i], tokenizer, model, isMulti, max_length, device)
             model_base_prediction[i] = predicted_class_id
         createDir(prediction_file)
-        np.save(prediction_file, model_base_prediction)
+        # np.save(prediction_file, model_base_prediction)
+        writePickle(model_base_prediction, prediction_file, "wb")
     return model_base_prediction
 
 

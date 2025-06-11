@@ -6,7 +6,7 @@ import numpy as np
 from allennlp.predictors import Predictor
 import re
 import torch
-from tools import methods
+import methods
 
 
 version = "1.3.1"

@@ -17,7 +17,6 @@ parser.add_argument('model', type=str, help="Path to the model")
 parser.add_argument('dataset_path', type=str, help="Hugging face path to dataset")
 parser.add_argument('set', type=str, help="Set to train on between train, validation and test")
 parser.add_argument('--comment', type=str, default='default', help="Short comment added to the results")
-parser.add_argument('--dict_path', default="data/gender/male_female.csv", type=str, help="Path to words file")
 parser.add_argument('--length', type=int, default=512, help="The length truncation of the labels used")
 parser.add_argument('--depen_ablation', action='store_true')
 parser.add_argument('--single_ablation', action='store_true')
@@ -25,11 +24,12 @@ parser.add_argument('--checking_ablation', action='store_true')
 parser.add_argument('--coref_ablation', action='store_true')
 parser.add_argument('--sememe_ablation', action='store_true')
 parser.add_argument('--mutation_only', action='store_true')
+parser.add_argument("--output_path", type=str, default="../output/", help="Path to the output folder")
+parser.add_argument("--data_path", type=str, default="../data/", help="Path to the data folder")
 
 args = parser.parse_args()
 model_path = args.model
 dataset_path = args.dataset_path
-dict_path = args.dict_path
 comment = args.comment
 trunc_length = args.length
 split_of_dataset = args.set
@@ -39,17 +39,20 @@ checking_ablation = args.checking_ablation
 coref_ablation = args.coref_ablation
 sememe_ablation = args.sememe_ablation
 mutation_only = args.mutation_only
+root_output_path = args.output_path
+root_data_path = args.data_path
+
+job_path = root_data_path+"/gender/male_female_job.csv"
+dict_path = root_data_path+"/gender/male_female.csv"
+job_file_name, job_list_A, job_list_B = methods.getWordlist(job_path)
 full_lists_name, new_word_list_A, new_word_list_B = methods.getWordlist(dict_path)
+
 
 if coref_ablation :
     depen_ablation=True
     sememe_ablation=True
     single_ablation=True
     checking_ablation=True
-
-job_path = "../data/gender/male_female_job.csv"
-job_file_name, job_list_A, job_list_B = methods.getWordlist(job_path)
-
 
 
 device = torch.device('cuda') if cuda else torch.device('cpu')
@@ -77,7 +80,10 @@ if not isinstance(dataset_labels[0], list):
     for x in range(complete_dataset_size): dataset_labels[x] = [dataset_labels[x]]
 for x in range(complete_dataset_size): dataset_labels[x].sort()
 
-output_path = "output" + "/" + dataset_name + "/" + model_name + "/" + split_of_dataset + "/"
+
+
+
+output_path = root_output_path + "/" + dataset_name + "/" + model_name + "/" + split_of_dataset + "/"
 methods.createDir(output_path)
 
 # Loading Tokenizer and Model
@@ -119,7 +125,7 @@ def fct_smart_replacement():
     nb_errors = 0
     for i in range(len(truncated_text)):
         if i % 10 == 0 :
-            print("Doing case {}/{}".format( i, len(truncated_text)))
+            print("Progress: case {}/{}".format( i, len(truncated_text)))
         case_error = 0
         smart_generation = sc.getSentenceReplacements(truncated_text[i])
         if smart_generation == None :
@@ -134,9 +140,9 @@ def fct_smart_replacement():
             case_error += increment
             nb_errors += increment
             e += [increment, truncated_text[i], i]
-            if case_error > 0:
-                print(">>Case {}/{} modified {} time(s) for {} error(s) ".format(i, complete_dataset_size, len(smart_generation),
-                                                                           case_error))
+            # if case_error > 0:
+            #     print(">>Case {}/{} modified {} time(s) for {} error(s) ".format(i, complete_dataset_size, len(smart_generation),
+            #                                                                case_error))
         mutants.append(smart_generation)
     print("Total of {} mutants and {} errors.".format(nb_mutants, nb_errors))
 
@@ -158,7 +164,7 @@ mutants, nb_mutants, nb_errors, nb_discarded_cases = fct_smart_replacement()
 testing_time = time.time() - start_time
 columns = ["Male-Female", "Mutant", "Coref_modification", "Depen_modification", "Atomic_modification"
            , "Nb_dictionary", "Nb_sememe", "Pass_simi_check", "Error", "Original_trunc", "Case_ID"]
-print("Testing took {} seconds.".format(testing_time))
+# print("Testing took {} seconds.".format(testing_time))
 
 # Saving pickle with errors
 content = [[columns, nb_mutants, nb_errors, nb_discarded_cases, testing_time,comment], mutants]
@@ -169,13 +175,13 @@ pickle.dump(content, file)
 file.close()
 
 #Saving unknown words
-dict_path = "../output/dict_unknown.pkl"
-
-print("Saving dict ...")
-if os.path.isfile(dict_path):
-    dict_from_file = methods.getFromPickle(dict_path, "rb")
-    dict_from_file.update(set([(x[0],x[1][2]) for x in sc.dict_unk_words.items() if x[1][0] != sc.NO_GENDER]))
-else:
-    dict_from_file = set([(x[0],x[1][2]) for x in sc.dict_unk_words.items() if x[1][0] != sc.NO_GENDER])
-methods.writePickle(dict_from_file, dict_path, 'wb')
-print("exit")
+# dict_path = "../output/dict_unknown.pkl"
+#
+# print("Saving dict ...")
+# if os.path.isfile(dict_path):
+#     dict_from_file = methods.getFromPickle(dict_path, "rb")
+#     dict_from_file.update(set([(x[0],x[1][2]) for x in sc.dict_unk_words.items() if x[1][0] != sc.NO_GENDER]))
+# else:
+#     dict_from_file = set([(x[0],x[1][2]) for x in sc.dict_unk_words.items() if x[1][0] != sc.NO_GENDER])
+# methods.writePickle(dict_from_file, dict_path, 'wb')
+print("Done")
