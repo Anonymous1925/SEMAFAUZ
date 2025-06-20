@@ -1,0 +1,39 @@
+#!/bin/bash
+
+LLAMA_TOKEN=$1
+GPT_TOKEN=$2
+
+# Define all parameter lists
+datasets=("imdb" "ecthr_a" "scotus" "ledgar" "eurlex")
+splits=("test" "validation" "train")
+models=("gpt" "llama")
+ablation_files=(
+  "checking_ablation_mutants.pkl"
+  "coref_ablation_mutants.pkl"
+  "default_mutants.pkl"
+  "depen_ablation_mutants.pkl"
+  "sememe_ablation_mutants.pkl"
+  "single_ablation_mutants.pkl"
+)
+
+# Loop over all combinations
+for dataset in "${datasets[@]}"; do
+  for model in "${models[@]}"; do
+    for split in "${splits[@]}"; do
+      for ablation in "${ablation_files[@]}"; do
+        echo "Running for dataset=$dataset, model=$model, split=$split, ablation=$ablation"
+
+        python3 -u src/llms_mutants_legal_testing_dcs.py \
+          "$model" \
+          "$dataset" \
+          "$split" \
+          "$LLAMA_TOKEN" \
+          "$GPT_TOKEN" \
+          --comment="${ablation%.pkl}" \
+          --"${ablation%.pkl}" \
+          --data_path="../data" \
+          --output_path="../output"
+      done
+    done
+  done
+done

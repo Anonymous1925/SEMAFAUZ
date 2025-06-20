@@ -1,7 +1,3 @@
-*Work in progress*
-
-## Table of Contents
-
 ## About The Project
 
 The code implements *SEMAFAUZ*. *SEMAFAUZ* is a semantics-aware fairness testing approach.
@@ -53,7 +49,7 @@ PYTHONUNBUFFERED=1 PYTHONHASHSEED=0 python your_script.py
 
 The experiments were tested on both Windows and Linux (Ubuntu 20.04).
 
-- Python 3.9.
+- Python 3.8.
 - NVIDIA GPU with at least 24GB VRAM
 - At least one non-hierarchical model trained from [LexGLUE](https://github.com/coastalcph/lex-glue) (all 16 combinations of BERT models/datasets cited above to reproduce everything).
 - Access to the Llama model `meta-llama/Llama-2-7b-chat-hf` on Hugging Face. You may need to complete a form to request access from Meta [here](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf).
@@ -64,18 +60,20 @@ It is recommended to use **separate virtual environments** for BERT models and L
 
 ## Usage
 
+---
+
 ### BERT Models
 
 #### Setup
 
 - Ensure all dependencies in `requirements_bert_mutation.txt` are installed. It is best to use a dedicated virtual environment for BERT-related experiments.
 
-- You will need CUDA 11 or above installed
+- You will need CUDA 12 installed
 #### Training
 
 Train the BERT models using the datasets specified in [LexGLUE](https://github.com/coastalcph/lex-glue).
 
-## Testing
+#### Testing
 
 To test a BERT model, run the following script with the appropriate parameters:
 
@@ -90,7 +88,7 @@ python3 src/smart_replacement.py ../models/ecthr_a/bert-base-uncased/seed_1/ lex
 
 To reproduce the results of the paper, it is required to run this for each dataset, model and ablation setting.
 
-### Required Parameters
+##### Required Parameters
 
 - `<model>`: Path to the model to test.  
   Must be one of:  `'bert-base-uncased'`, `'microsoft/deberta-base'`, `'roberta-base'`, `'nlpaueb/legal-bert-base-uncased'`
@@ -100,7 +98,7 @@ To reproduce the results of the paper, it is required to run this for each datas
 
 - `<set>`: Dataset split to use: `"train"`, `"validation"`, or `"test"`.
 
-### Optional Parameters
+##### Optional Parameters
 
 - `--comment`: Short comment added to the results (default: `'default'`).  
   **⚠️ When using an ablation flag, the comment must exactly match the ablation name** for future processing steps to function correctly.
@@ -118,7 +116,7 @@ To reproduce the results of the paper, it is required to run this for each datas
 - `--output_path`: Path to the output folder where the mutants and results will be generated (default: `../output/`).
 - `--data_path`: Path to the data folder containing the dictionnary (default: `../data/`).
 
-### Example
+##### Example
 
 ```bash
 python3 src/smart_replacement.py ../models/ecthr_a/bert-base-uncased/seed_1/ lex_glue test --comment="checking_ablation" --checking_ablation --data_path="../data" --output_path="../output"
@@ -136,7 +134,7 @@ In this example:
 > ✅ **Important**: When using an ablation flag (e.g., `--checking_ablation`), the `--comment` must match its name exactly (e.g., `--comment="checking_ablation"`).
 
 
-### Output Files
+##### Output Files
 
 The script will generate result files inside the directory specified by the `--output_path` parameter (default is `../output/`). The folder structure is as follows:
 
@@ -148,21 +146,104 @@ The script will generate result files inside the directory specified by the `--o
             ├── base_prediction.pkl
             ├── truncated_text.pkl
             └── error_details/
-                └── <ablation>_mutants.pkl  (only if an ablation is used)
+                └── <ablation>_mutants.pkl
 ```
 
-#### Parameters:
+##### Parameters:
 - `<output_path>`: The root of the output folder, defined by the `--output_path` argument (default: `../output/`)
 - `<dataset>`: The name of the dataset (e.g., `ecthr_a`)
 - `<model>`: The model used (e.g., `bert-base-uncased`)
 - `<set>`: The dataset split (`train`, `validation`, or `test`)
 - `<ablation>`: The ablation method used (e.g., `checking_ablation`, `single_ablation`, etc.)
 
-#### Description of Output Files
+##### Description of Output Files
 
 - `base_prediction.pkl`: The model’s predictions on the original, unmodified inputs.
 - `truncated_text.pkl`: The input texts after truncation based on the `--length` parameter.
 - `<ablation>_mutants.pkl`: File containing mutated inputs and predictions.
+
+#### Run Every Bert Models
+
+To run the full set of experiments for BERT models across all datasets and ablation settings, you can use the provided script:
+
+```bash
+./script_test_bert.sh <data_path> <output_path>
+```
+
+Where:
+- `<data_path>` is the path to the data folder (e.g., `../data`)
+- `<output_path>` is the destination folder for the output (e.g., `../output`)
+
+> ⚠️ **Note:**  
+> This script will launch a large number of experiments and can take **several days** to complete.
+
+
+
+---
+
+### LLAMA / GPT Models
+
+#### Setup
+
+- To run experiments using LLaMA and GPT models, it is recommended to use a **dedicated virtual environment** to avoid dependency conflicts with the BERT setup.
+
+- Ensure the dependencies in `requirements_llms.txt` are installed.
+
+
+#### Truncation Generation
+
+Generate the truncated versions of the input cases of each datasets for both LLAMA/GPT using the following script:
+
+```bash
+python3 src/generate_llms_truncation.py [--data_path <path>] [--output_path <path>]
+```
+
+**Optional Parameters:**
+
+- `--data_path`: Path to the folder containing the source data files to process.  
+  Default is `./data/`.
+
+- `--output_path`: Path to the folder where the truncated cases will be saved.  
+  Default is `./output/`.
+
+#### Testing Original Inputs on LLAMA / GPT
+
+> ⚠️ **Warning: Running this script will trigger a large number of OpenAI API calls, and significant costs.**  
+
+To evaluate the original inputs on LLaMA and GPT models, use the provided script:
+
+```bash
+./script_evaluate_llms.sh <LLAMA_TOKEN> <GPT_TOKEN>
+```
+
+Where:
+- `<LLAMA_TOKEN>` is your Hugging Face access token for `meta-llama/Llama-2-7b-chat-hf`.
+- `<GPT_TOKEN>` is your OpenAI API key for accessing `gpt-3.5-turbo-0125`.
+
+This script runs `test_llms_originals.py` across all combinations of datasets and models.
+
+#### Generating Mutants for LLAMA / GPT
+
+To generate mutated inputs (fairness test cases) for LLaMA and GPT models across datasets, use the following script:
+
+```bash
+./src/script_mutants_llms.sh
+```
+
+This script launches the mutant generation pipeline across all combinations of datasets and models, and take several days.
+
+#### Testing Mutants for LLAMA / GPT
+
+> ⚠️ **Warning: Running this script will trigger a large number of OpenAI API calls, and significant costs.**  
+
+
+To test all fairness mutants generated for LLaMA and GPT across all datasets and ablation settings:
+
+```bash
+./script_test_mutants_llms.sh <LLAMA_TOKEN> <GPT_TOKEN>
+```
+
+This script launches the mutants testing pipeline across all combinations of datasets and models, and take several days.
 
 ## Useful Links
 
