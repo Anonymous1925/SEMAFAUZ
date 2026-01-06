@@ -8,8 +8,6 @@ The approach uses a bias dictionary produced from [SBIC](https://paperswithcode.
 
 The repository evaluates *SEMAFAUZ* using [LexGLUE](https://github.com/coastalcph/lex-glue) Benchmark **four** legal datasets (*Ecthr*, *Scotus*, *Eurlex*, *Ledgar*) and **four** LLM architectures (*BERT*, *Legal-BERT*, *RoBERTA*, *DeBERTA*) resulting in **16** models to evaluate **three** sensitive attributes (*race*, *gender*, *body*). In addition, we use Llama2 and GPT3.5 in our experiments, and IMDB, for a total of **18** models and **five** datasets.
 
-Supplementary materials for the paper can be found [here](supplementary_materials.pdf).
-
 Details of the performance of our fine-tuned models versus the original from [LexGLUE](https://github.com/coastalcph/lex-glue).
 
 
